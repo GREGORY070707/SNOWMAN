@@ -194,6 +194,9 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
           isOpen={isPricingModalOpen}
           onClose={() => setIsPricingModalOpen(false)}
           userProfile={userProfile}
+          onUpgradeSuccess={() => {
+            // Refresh will happen in the modal
+          }}
         />
       )}
 
