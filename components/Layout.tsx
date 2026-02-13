@@ -205,7 +205,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile, onNavigate, curr
         </div>
 
         {/* Footer */}
-        <footer className="border-t border-white/5 bg-[#0a0a0a] mt-20">
+        <footer className="border-t border-white/5 bg-[#0d0d0d] mt-20">
           <div className="max-w-7xl mx-auto px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
               {/* Brand Section */}
