@@ -5,6 +5,7 @@ import SearchInput from './components/SearchInput';
 import ProblemCard from './components/ProblemCard';
 import ProgressIndicator from './components/ProgressIndicator';
 import { Auth } from './components/Auth';
+import { PastResearch } from './components/PastResearch';
 import { ResearchEngine } from './services/researchEngine';
 import { Problem, ResearchStatus, UserProfile } from './types';
 import { supabase } from './lib/supabase';
@@ -14,6 +15,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [currentView, setCurrentView] = useState<'discover' | 'past-research'>('discover');
   
   const [topic, setTopic] = useState('');
   const [status, setStatus] = useState<ResearchStatus>(ResearchStatus.IDLE);
@@ -196,8 +198,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <Layout userProfile={userProfile}>
-      {status === ResearchStatus.IDLE && (
+    <Layout userProfile={userProfile} onNavigate={setCurrentView} currentView={currentView}>
+      {currentView === 'past-research' ? (
+        userProfile && <PastResearch userProfile={userProfile} onNavigateToDiscover={() => setCurrentView('discover')} />
+      ) : (
+        <>
+          {status === ResearchStatus.IDLE && (
         <div className="flex flex-col items-center justify-center min-h-[70vh]">
           <SearchInput onSearch={handleSearch} isLoading={false} />
           <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
@@ -283,6 +289,8 @@ const App: React.FC = () => {
              </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </Layout>
   );

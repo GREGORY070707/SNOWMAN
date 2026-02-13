@@ -10,9 +10,11 @@ import { PricingModal } from './PricingModal';
 interface LayoutProps {
   children: React.ReactNode;
   userProfile?: UserProfile | null;
+  onNavigate?: (view: 'discover' | 'past-research') => void;
+  currentView?: 'discover' | 'past-research';
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
+const Layout: React.FC<LayoutProps> = ({ children, userProfile, onNavigate, currentView = 'discover' }) => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,8 +52,18 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
         </div>
 
         <nav className="flex-1 space-y-1">
-          <NavItem icon={<Search size={20} />} label="Discover" active />
-          <NavItem icon={<History size={20} />} label="Past Research" />
+          <NavItem 
+            icon={<Search size={20} />} 
+            label="Discover" 
+            active={currentView === 'discover'}
+            onClick={() => onNavigate?.('discover')}
+          />
+          <NavItem 
+            icon={<History size={20} />} 
+            label="Past Research"
+            active={currentView === 'past-research'}
+            onClick={() => onNavigate?.('past-research')}
+          />
           <NavItem icon={<BarChart3 size={20} />} label="Market Trends" />
         </nav>
 
@@ -217,8 +229,10 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
   );
 };
 
-const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean }> = ({ icon, label, active }) => (
-  <button className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
     active 
       ? 'bg-white/5 text-white border border-white/10' 
       : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
