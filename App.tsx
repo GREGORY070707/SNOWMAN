@@ -24,19 +24,27 @@ const App: React.FC = () => {
   const engine = new ResearchEngine();
 
   useEffect(() => {
+    console.log('🚀 App initializing...');
     const initAuth = async () => {
       try {
+        console.log('📡 Fetching session from Supabase...');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error('Supabase auth error:', error);
+          console.error('❌ Supabase auth error:', error);
           setError('Authentication service unavailable. Please check your connection.');
+        } else {
+          console.log('✅ Session fetched:', session ? 'User logged in' : 'No session');
         }
         setSession(session);
-        if (session) await fetchProfile(session.user.id);
+        if (session) {
+          console.log('👤 Fetching user profile...');
+          await fetchProfile(session.user.id);
+        }
       } catch (err) {
-        console.error('Failed to initialize auth:', err);
+        console.error('💥 Failed to initialize auth:', err);
         setError('Failed to connect to authentication service.');
       } finally {
+        console.log('✅ Auth loading complete');
         setAuthLoading(false);
       }
     };
@@ -44,6 +52,7 @@ const App: React.FC = () => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('🔄 Auth state changed:', _event);
       setSession(session);
       if (session) fetchProfile(session.user.id);
       else setUserProfile(null);
@@ -122,9 +131,19 @@ const App: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-screen bg-[#0d0d0d] flex items-center justify-center flex-col gap-4">
-        <Loader2 className="text-green-500 animate-spin" size={40} />
-        <p className="text-zinc-500 text-sm">Loading...</p>
+      <div style={{ 
+        height: '100vh', 
+        width: '100vw', 
+        backgroundColor: '#0d0d0d', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
+        <Loader2 style={{ color: '#10b981' }} className="animate-spin" size={40} />
+        <p style={{ color: '#71717a', fontSize: '14px' }}>Loading application...</p>
+        <p style={{ color: '#52525b', fontSize: '12px' }}>Connecting to Supabase...</p>
       </div>
     );
   }
@@ -132,6 +151,40 @@ const App: React.FC = () => {
   // Add error boundary for debugging
   if (error && status === ResearchStatus.IDLE) {
     console.error('App initialization error:', error);
+    return (
+      <div style={{ 
+        height: '100vh', 
+        width: '100vw', 
+        backgroundColor: '#0d0d0d', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '16px',
+        padding: '24px'
+      }}>
+        <div style={{ color: '#ef4444', fontSize: '18px', fontWeight: 'bold' }}>
+          Initialization Error
+        </div>
+        <p style={{ color: '#71717a', fontSize: '14px', maxWidth: '500px', textAlign: 'center' }}>
+          {error}
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: '#10b981',
+            color: '#000',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          Reload Page
+        </button>
+      </div>
+    );
   }
 
   if (!session) {
