@@ -30,7 +30,11 @@ export class ResearchEngine {
   }
 
   private async simulateExtraction(topic: string, plan: ResearchPlan, onProgress: (step: string) => void): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+    const apiKey = import.meta.env.VITE_API_KEY;
+    if (!apiKey) {
+      throw new Error('VITE_API_KEY environment variable is not set');
+    }
+    const ai = new GoogleGenAI({ apiKey });
     
     // Using flash for faster simulation
     const response = await ai.models.generateContent({

@@ -5,7 +5,12 @@ import { ResearchPlan, Problem } from "../types";
 export class GeminiService {
   // Generates a research plan based on the provided topic.
   async generateResearchPlan(topic: string): Promise<ResearchPlan> {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+    const apiKey = import.meta.env.VITE_API_KEY;
+    console.log('API Key available:', !!apiKey);
+    if (!apiKey) {
+      throw new Error('VITE_API_KEY environment variable is not set');
+    }
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate a research plan for the topic: "${topic}". 
@@ -32,7 +37,11 @@ export class GeminiService {
   // Analyzes raw data and clusters it into specific business problems.
   // Switched to gemini-3-flash-preview for high speed.
   async analyzeAndCluster(topic: string, rawData: string): Promise<Problem[]> {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+    const apiKey = import.meta.env.VITE_API_KEY;
+    if (!apiKey) {
+      throw new Error('VITE_API_KEY environment variable is not set');
+    }
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Analyze this research data for the topic "${topic}" and cluster them into the top 5-10 business problems.
