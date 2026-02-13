@@ -50,8 +50,8 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
         {userProfile && (
           <div className="p-4 rounded-2xl bg-white/5 border border-white/5 mt-auto">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-500">
-                <User size={20} />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 border border-white/10 flex items-center justify-center text-white text-sm font-bold">
+                {userProfile.first_name?.[0]?.toUpperCase()}{userProfile.last_name?.[0]?.toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white truncate">{userProfile.first_name} {userProfile.last_name}</p>
@@ -95,7 +95,11 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
              <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-medium hover:bg-white/10 transition-colors">
               New Project
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-800 border border-white/10" />
+            {userProfile && (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 border border-white/10 flex items-center justify-center text-white text-xs font-bold">
+                {userProfile.first_name?.[0]?.toUpperCase()}{userProfile.last_name?.[0]?.toUpperCase()}
+              </div>
+            )}
           </div>
         </header>
 
