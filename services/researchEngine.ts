@@ -1,5 +1,5 @@
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { GeminiService } from "./geminiService";
 import { Problem, ResearchPlan } from "../types";
 
@@ -30,18 +30,18 @@ export class ResearchEngine {
   }
 
   private async simulateExtraction(topic: string, plan: ResearchPlan, onProgress: (step: string) => void): Promise<string> {
-    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
     
-    const prompt = `Simulate search results for: "${topic}". 
+    // Using flash for faster simulation
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Simulate search results for: "${topic}". 
       Subreddits: ${plan.subreddits.join(', ')}.
-      Generate 15 specific raw user complaints and forum posts with source URLs.`;
-    
-    const result = await model.generateContent(prompt);
-    const response = result.response;
+      Generate 15 specific raw user complaints and forum posts with source URLs.`,
+    });
 
     onProgress(`🔍 Extracting complaints from review sites...`);
     
-    return response.text();
+    return response.text || '';
   }
 }
