@@ -36,9 +36,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({
         key: 'rzp_test_SFO7iX6k8JucVF', // Your Razorpay key
         amount: 9900, // ₹99 in paise
         currency: 'INR',
-        name: 'SignalFinder Pro',
+        name: 'GREGORY R MARAK',
         description: 'Lifetime Pro Access',
-        image: 'https://your-logo-url.com/logo.png', // Optional: Add your logo
         prefill: {
           name: `${userProfile.first_name} ${userProfile.last_name}`,
           email: userProfile.email,
