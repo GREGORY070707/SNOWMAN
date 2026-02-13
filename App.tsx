@@ -52,8 +52,11 @@ const App: React.FC = () => {
   };
 
   const handleSearch = useCallback(async (newTopic: string) => {
-    if (!userProfile || userProfile.credits <= 0) {
-      setError('You have run out of research credits. Please upgrade to Pro.');
+    if (!userProfile) return;
+
+    // Check Pro status first - Pro users bypass credit check
+    if (!userProfile.is_pro && userProfile.credits <= 0) {
+      setError('You have run out of research credits. Please upgrade to Pro for unlimited searches.');
       setStatus(ResearchStatus.FAILED);
       return;
     }
@@ -70,22 +73,24 @@ const App: React.FC = () => {
         if (step.includes('Pattern')) setStatus(ResearchStatus.ANALYZING);
       });
 
-      // Deduct credit in Supabase
-      const { error: creditError } = await supabase
-        .from('profiles')
-        .update({ credits: userProfile.credits - 1 })
-        .eq('id', userProfile.id);
+      // Only deduct credits for non-pro users
+      if (!userProfile.is_pro) {
+        const { error: creditError } = await supabase
+          .from('profiles')
+          .update({ credits: userProfile.credits - 1 })
+          .eq('id', userProfile.id);
 
-      if (!creditError) {
-        setUserProfile({ ...userProfile, credits: userProfile.credits - 1 });
-        
-        // Save search results
-        await supabase.from('searches').insert({
-          user_id: userProfile.id,
-          topic: newTopic,
-          results: results
-        });
+        if (!creditError) {
+          setUserProfile({ ...userProfile, credits: userProfile.credits - 1 });
+        }
       }
+      
+      // Save search results
+      await supabase.from('searches').insert({
+        user_id: userProfile.id,
+        topic: newTopic,
+        results: results
+      });
 
       setProblems(results);
       setStatus(ResearchStatus.COMPLETED);

@@ -3,6 +3,8 @@ import React from 'react';
 import { Search, History, Settings, HelpCircle, BarChart3, Target, LogOut, Zap, User } from 'lucide-react';
 import { UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
+import { UpgradeButton } from './UpgradeButton';
+import { VerifyPayment } from './VerifyPayment';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -30,6 +32,14 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
           <NavItem icon={<History size={20} />} label="Past Research" />
           <NavItem icon={<BarChart3 size={20} />} label="Market Trends" />
         </nav>
+
+        {/* Upgrade Section - Show only for non-pro users */}
+        {userProfile && !userProfile.is_pro && (
+          <div className="space-y-3">
+            <UpgradeButton userProfile={userProfile} />
+            <VerifyPayment />
+          </div>
+        )}
 
         {userProfile && (
           <div className="p-4 rounded-2xl bg-white/5 border border-white/5 mt-auto">
