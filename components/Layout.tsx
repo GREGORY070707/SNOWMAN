@@ -10,8 +10,8 @@ import { PricingModal } from './PricingModal';
 interface LayoutProps {
   children: React.ReactNode;
   userProfile?: UserProfile | null;
-  onNavigate?: (view: 'discover' | 'past-research') => void;
-  currentView?: 'discover' | 'past-research';
+  onNavigate?: (view: 'discover' | 'past-research' | 'market-trends') => void;
+  currentView?: 'discover' | 'past-research' | 'market-trends';
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, userProfile, onNavigate, currentView = 'discover' }) => {
@@ -64,7 +64,12 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile, onNavigate, curr
             active={currentView === 'past-research'}
             onClick={() => onNavigate?.('past-research')}
           />
-          <NavItem icon={<BarChart3 size={20} />} label="Market Trends" />
+          <NavItem 
+            icon={<BarChart3 size={20} />} 
+            label="Market Trends"
+            active={currentView === 'market-trends'}
+            onClick={() => onNavigate?.('market-trends')}
+          />
         </nav>
 
         {/* Upgrade Section - Show only for non-pro users */}
