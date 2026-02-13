@@ -4,6 +4,8 @@
 
 # Problem Signal Finder 🎯
 
+**🚀 Live Demo**: [https://snowman-5qu3.vercel.app](https://snowman-5qu3.vercel.app)
+
 An AI-powered research dashboard that helps entrepreneurs and product builders discover validated business problems and market opportunities. Scans Reddit, IndieHackers, Product Hunt, and other platforms to find real user complaints and pain points, then uses AI to analyze and rank them by business potential.
 
 ## ✨ Features
