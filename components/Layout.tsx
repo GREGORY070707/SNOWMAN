@@ -200,9 +200,78 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile, onNavigate, curr
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="p-8 max-w-7xl mx-auto pb-0">
           {children}
         </div>
+
+        {/* Footer */}
+        <footer className="border-t border-white/5 bg-[#0a0a0a] mt-20">
+          <div className="max-w-7xl mx-auto px-8 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+              {/* Brand Section */}
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl flex items-center justify-center">
+                    <Target className="text-white w-6 h-6" />
+                  </div>
+                  <h2 className="font-bold text-xl text-white">SignalFinder</h2>
+                </div>
+                <p className="text-zinc-400 text-sm leading-relaxed max-w-md mb-4">
+                  Discover validated problems from real complaints across Reddit, forums, and G2 reviews. 
+                  Find your next big opportunity in seconds.
+                </p>
+                <p className="text-zinc-600 text-xs">
+                  © {new Date().getFullYear()} SignalFinder. All rights reserved.
+                </p>
+              </div>
+
+              {/* Product Section */}
+              <div>
+                <h3 className="text-white font-bold text-sm mb-4">Product</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <button 
+                      onClick={() => onNavigate?.('discover')}
+                      className="text-zinc-400 hover:text-green-500 text-sm transition-colors"
+                    >
+                      Discover
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => setIsPricingModalOpen(true)}
+                      className="text-zinc-400 hover:text-green-500 text-sm transition-colors"
+                    >
+                      Pricing
+                    </button>
+                  </li>
+                  <li>
+                    <button className="text-zinc-400 hover:text-green-500 text-sm transition-colors">
+                      FAQ
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal Section */}
+              <div>
+                <h3 className="text-white font-bold text-sm mb-4">Legal</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <button className="text-zinc-400 hover:text-green-500 text-sm transition-colors">
+                      Terms of Service
+                    </button>
+                  </li>
+                  <li>
+                    <button className="text-zinc-400 hover:text-green-500 text-sm transition-colors">
+                      Privacy Policy
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </footer>
       </main>
 
       {/* Pricing Modal */}
