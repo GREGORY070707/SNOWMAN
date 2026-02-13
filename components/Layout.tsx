@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Search, History, Settings, HelpCircle, BarChart3, Target, LogOut, Zap, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, History, Settings, HelpCircle, BarChart3, Target, LogOut, Zap, User, CreditCard } from 'lucide-react';
 import { UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
 import { UpgradeButton } from './UpgradeButton';
@@ -14,10 +14,29 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   return (
     <div className="flex h-screen bg-[#0d0d0d] overflow-hidden">
@@ -96,8 +115,69 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
               New Project
             </button>
             {userProfile && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 border border-white/10 flex items-center justify-center text-white text-xs font-bold">
-                {userProfile.first_name?.[0]?.toUpperCase()}{userProfile.last_name?.[0]?.toUpperCase()}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 border border-white/10 flex items-center justify-center text-white text-xs font-bold hover:scale-105 transition-transform"
+                >
+                  {userProfile.first_name?.[0]?.toUpperCase()}{userProfile.last_name?.[0]?.toUpperCase()}
+                </button>
+
+                {/* Dropdown Menu */}
+                {isProfileDropdownOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-64 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl z-50 overflow-hidden"
+                    style={{ animation: 'fadeIn 0.2s ease-out' }}
+                  >
+                    {/* User Info Header */}
+                    <div className="p-4 border-b border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white text-sm font-bold">
+                          {userProfile.first_name?.[0]?.toUpperCase()}{userProfile.last_name?.[0]?.toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white truncate">
+                            {userProfile.first_name} {userProfile.last_name}
+                          </p>
+                          <p className="text-xs text-zinc-500 truncate">{userProfile.email}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-lg">
+                        <Zap size={12} className="text-green-500 fill-green-500" />
+                        <span className="text-xs font-bold text-green-500">{userProfile.credits} Credits Left</span>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <button className="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm">
+                        <CreditCard size={16} />
+                        <span>Billing</span>
+                      </button>
+                      
+                      {!userProfile.is_pro && (
+                        <button 
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            setIsPricingModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all text-sm"
+                        >
+                          <Zap size={16} className="fill-blue-400" />
+                          <span>Upgrade to Pro</span>
+                        </button>
+                      )}
+
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm"
+                      >
+                        <LogOut size={16} />
+                        <span>Log Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -116,6 +196,20 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
           userProfile={userProfile}
         />
       )}
+
+      {/* CSS for dropdown animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
