@@ -6,46 +6,51 @@ export const VerifyPayment: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [paymentId, setPaymentId] = useState('');
 
   const handleVerify = async () => {
+    if (!paymentId.trim()) {
+      setMessage('Please enter your Payment ID from Razorpay');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
     setIsSuccess(false);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
+      if (!session) {
         setMessage('Please log in first');
         setLoading(false);
         return;
       }
 
-      // Refresh profile from database
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Call Supabase Edge Function to verify payment
+      const { data, error } = await supabase.functions.invoke('verify-razorpay-payment', {
+        body: { paymentId: paymentId.trim() },
+      });
 
       if (error) {
-        console.error('Error fetching profile:', error);
-        setMessage('Error checking status. Please try again.');
+        console.error('Verification error:', error);
+        setMessage(error.message || 'Payment verification failed. Please check your Payment ID.');
         setLoading(false);
         return;
       }
 
-      if (profile.is_pro) {
-        setMessage('✅ Your Pro upgrade is active! Refreshing...');
+      if (data.success) {
+        setMessage('✅ Payment verified! Your Pro upgrade is active. Refreshing...');
         setIsSuccess(true);
         // Reload page after 2 seconds to show updated UI
         setTimeout(() => window.location.reload(), 2000);
       } else {
-        setMessage('Payment not yet processed. Please wait a few moments and try again.');
+        setMessage(data.error || 'Payment verification failed');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Verification error:', err);
-      setMessage('Error verifying payment. Please try again.');
+      setMessage(err.message || 'Error verifying payment. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -58,25 +63,59 @@ export const VerifyPayment: React.FC = () => {
         <h3 className="text-sm font-bold text-white">Completed Payment?</h3>
       </div>
       <p className="text-xs text-zinc-400 mb-3">
-        After completing payment on Razorpay, click below to activate your Pro status
+        After completing payment on Razorpay, enter your Payment ID below to activate Pro
       </p>
-      <button
-        onClick={handleVerify}
-        disabled={loading}
-        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <Loader2 size={14} className="animate-spin" />
-            Checking...
-          </>
-        ) : (
-          <>
-            <CheckCircle size={14} />
-            Verify Payment
-          </>
-        )}
-      </button>
+      
+      {!showInput ? (
+        <button
+          onClick={() => setShowInput(true)}
+          className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+        >
+          <CheckCircle size={14} />
+          Verify Payment
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={paymentId}
+            onChange={(e) => setPaymentId(e.target.value)}
+            placeholder="Enter Payment ID (e.g., pay_xxxxx)"
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleVerify}
+              disabled={loading || !paymentId.trim()}
+              className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-bold hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={14} />
+                  Verify
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setShowInput(false);
+                setPaymentId('');
+                setMessage('');
+              }}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg bg-white/10 border border-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      
       {message && (
         <div className={`mt-3 p-2 rounded-lg flex items-start gap-2 ${
           isSuccess 
