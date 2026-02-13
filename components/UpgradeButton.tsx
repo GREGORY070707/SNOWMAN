@@ -1,17 +1,13 @@
 import React from 'react';
-import { Zap, ExternalLink } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface UpgradeButtonProps {
   userProfile: UserProfile;
+  onOpenModal: () => void;
 }
 
-export const UpgradeButton: React.FC<UpgradeButtonProps> = ({ userProfile }) => {
-  const handleUpgrade = () => {
-    // Open Razorpay payment link in new tab
-    window.open('https://rzp.io/rzp/RbSHdYgS', '_blank');
-  };
-
+export const UpgradeButton: React.FC<UpgradeButtonProps> = ({ userProfile, onOpenModal }) => {
   // Don't show button if user is already Pro
   if (userProfile.is_pro) {
     return null;
@@ -27,11 +23,10 @@ export const UpgradeButton: React.FC<UpgradeButtonProps> = ({ userProfile }) => 
         Get unlimited research + 1000 credits for just ₹99 (one-time)
       </p>
       <button
-        onClick={handleUpgrade}
+        onClick={onOpenModal}
         className="w-full px-4 py-2 rounded-lg bg-green-500 text-black text-sm font-bold hover:bg-green-400 transition-colors flex items-center justify-center gap-2"
       >
-        Unlock Pro for ₹99
-        <ExternalLink size={14} />
+        View Plans
       </button>
       <p className="text-[10px] text-zinc-500 mt-2 text-center">
         Secure payment via Razorpay

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, History, Settings, HelpCircle, BarChart3, Target, LogOut, Zap, User } from 'lucide-react';
 import { UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
 import { UpgradeButton } from './UpgradeButton';
 import { VerifyPayment } from './VerifyPayment';
+import { PricingModal } from './PricingModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -36,7 +39,10 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
         {/* Upgrade Section - Show only for non-pro users */}
         {userProfile && !userProfile.is_pro && (
           <div className="space-y-3">
-            <UpgradeButton userProfile={userProfile} />
+            <UpgradeButton 
+              userProfile={userProfile} 
+              onOpenModal={() => setIsPricingModalOpen(true)} 
+            />
             <VerifyPayment />
           </div>
         )}
@@ -97,6 +103,15 @@ const Layout: React.FC<LayoutProps> = ({ children, userProfile }) => {
           {children}
         </div>
       </main>
+
+      {/* Pricing Modal */}
+      {userProfile && (
+        <PricingModal
+          isOpen={isPricingModalOpen}
+          onClose={() => setIsPricingModalOpen(false)}
+          userProfile={userProfile}
+        />
+      )}
     </div>
   );
 };
