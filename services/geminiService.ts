@@ -1,100 +1,99 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { ResearchPlan, Problem } from "../types";
 
 export class GeminiService {
+  private genAI: GoogleGenerativeAI;
+
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
+  }
+
   // Generates a research plan based on the provided topic.
   async generateResearchPlan(topic: string): Promise<ResearchPlan> {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
-    const response = await ai.models.generateContent({
+    const model = this.genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      contents: `Generate a research plan for the topic: "${topic}". 
-      Focus on finding business problems, customer complaints, and market gaps.`,
-      config: {
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            subreddits: { type: Type.ARRAY, items: { type: Type.STRING } },
-            searchTerms: { type: Type.ARRAY, items: { type: Type.STRING } },
-            productHuntQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
-            reviewSiteQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
-            competitorTools: { type: Type.ARRAY, items: { type: Type.STRING } }
+            subreddits: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            searchTerms: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            productHuntQueries: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            reviewSiteQueries: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            competitorTools: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
           },
           required: ["subreddits", "searchTerms", "productHuntQueries", "reviewSiteQueries", "competitorTools"]
         }
       }
     });
 
-    return JSON.parse(response.text || '{}');
+    const prompt = `Generate a research plan for the topic: "${topic}". 
+      Focus on finding business problems, customer complaints, and market gaps.`;
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    return JSON.parse(response.text());
   }
 
   // Analyzes raw data and clusters it into specific business problems.
-  // Switched to gemini-1.5-flash for high speed.
   async analyzeAndCluster(topic: string, rawData: string): Promise<Problem[]> {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
-    const response = await ai.models.generateContent({
+    const model = this.genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      contents: `Analyze this research data for the topic "${topic}" and cluster them into the top 5-10 business problems.
-      Data: ${rawData}
-      
-      Score each problem cluster (0-10) on:
-      - Frequency, Pain Intensity, Monetization, Solvability, Competitive Gap.
-      
-      Overall Signal Score is weighted: (Freq*0.25) + (Pain*0.25) + (Money*0.3) + (Solvability*0.1) + (Gap*0.1).`,
-      config: {
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              id: { type: Type.STRING },
-              rank: { type: Type.NUMBER },
-              problemStatement: { type: Type.STRING },
-              signalScore: { type: Type.NUMBER },
+              id: { type: SchemaType.STRING },
+              rank: { type: SchemaType.NUMBER },
+              problemStatement: { type: SchemaType.STRING },
+              signalScore: { type: SchemaType.NUMBER },
               scores: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  frequency: { type: Type.NUMBER },
-                  painIntensity: { type: Type.NUMBER },
-                  monetization: { type: Type.NUMBER },
-                  solvability: { type: Type.NUMBER },
-                  competitiveGap: { type: Type.NUMBER }
+                  frequency: { type: SchemaType.NUMBER },
+                  painIntensity: { type: SchemaType.NUMBER },
+                  monetization: { type: SchemaType.NUMBER },
+                  solvability: { type: SchemaType.NUMBER },
+                  competitiveGap: { type: SchemaType.NUMBER }
                 }
               },
               evidence: {
-                type: Type.ARRAY,
+                type: SchemaType.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: SchemaType.OBJECT,
                   properties: {
-                    text: { type: Type.STRING },
-                    source: { type: Type.STRING },
-                    url: { type: Type.STRING },
-                    platform: { type: Type.STRING }
+                    text: { type: SchemaType.STRING },
+                    source: { type: SchemaType.STRING },
+                    url: { type: SchemaType.STRING },
+                    platform: { type: SchemaType.STRING }
                   }
                 }
               },
               existingSolutions: {
-                type: Type.ARRAY,
+                type: SchemaType.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: SchemaType.OBJECT,
                   properties: {
-                    name: { type: Type.STRING },
-                    url: { type: Type.STRING },
-                    rating: { type: Type.NUMBER },
-                    complaintSummary: { type: Type.STRING },
-                    reviewCount: { type: Type.NUMBER }
+                    name: { type: SchemaType.STRING },
+                    url: { type: SchemaType.STRING },
+                    rating: { type: SchemaType.NUMBER },
+                    complaintSummary: { type: SchemaType.STRING },
+                    reviewCount: { type: SchemaType.NUMBER }
                   }
                 }
               },
-              suggestedNextStep: { type: Type.STRING },
+              suggestedNextStep: { type: SchemaType.STRING },
               metadata: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  mentionCount: { type: Type.NUMBER },
-                  sources: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  createdAt: { type: Type.STRING }
+                  mentionCount: { type: SchemaType.NUMBER },
+                  sources: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                  createdAt: { type: SchemaType.STRING }
                 }
               }
             },
@@ -104,6 +103,16 @@ export class GeminiService {
       }
     });
 
-    return JSON.parse(response.text || '[]');
+    const prompt = `Analyze this research data for the topic "${topic}" and cluster them into the top 5-10 business problems.
+      Data: ${rawData}
+      
+      Score each problem cluster (0-10) on:
+      - Frequency, Pain Intensity, Monetization, Solvability, Competitive Gap.
+      
+      Overall Signal Score is weighted: (Freq*0.25) + (Pain*0.25) + (Money*0.3) + (Solvability*0.1) + (Gap*0.1).`;
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    return JSON.parse(response.text());
   }
 }
