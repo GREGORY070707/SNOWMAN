@@ -46,7 +46,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, isLoading }) => {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g., 'Automation struggles for small gym owners'"
-            className="flex-1 bg-transparent border-none outline-none px-4 py-4 text-lg text-white placeholder:text-zinc-600 font-medium"
+            className="flex-1 bg-transparent border-none outline-none px-4 py-4 text-lg text-white placeholder:text-zinc-500 font-medium"
             disabled={isLoading}
           />
           <button
