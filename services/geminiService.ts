@@ -7,7 +7,7 @@ export class GeminiService {
   async generateResearchPlan(topic: string): Promise<ResearchPlan> {
     const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: `Generate a research plan for the topic: "${topic}". 
       Focus on finding business problems, customer complaints, and market gaps.`,
       config: {
@@ -30,11 +30,11 @@ export class GeminiService {
   }
 
   // Analyzes raw data and clusters it into specific business problems.
-  // Switched to gemini-2.0-flash-exp for high speed.
+  // Switched to gemini-1.5-flash for high speed.
   async analyzeAndCluster(topic: string, rawData: string): Promise<Problem[]> {
     const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: `Analyze this research data for the topic "${topic}" and cluster them into the top 5-10 business problems.
       Data: ${rawData}
       

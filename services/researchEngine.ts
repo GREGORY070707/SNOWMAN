@@ -34,7 +34,7 @@ export class ResearchEngine {
     
     // Using flash for faster simulation
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: `Simulate search results for: "${topic}". 
       Subreddits: ${plan.subreddits.join(', ')}.
       Generate 15 specific raw user complaints and forum posts with source URLs.`,
