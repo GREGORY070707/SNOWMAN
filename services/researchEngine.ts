@@ -1,51 +1,37 @@
 
-import { GoogleGenAI } from "@google/genai";
-import { GeminiService } from "./geminiService";
+import { GroqService } from "./groqService";
 import { Problem, ResearchPlan } from "../types";
 
 export class ResearchEngine {
-  private gemini: GeminiService;
+  private groq: GroqService;
 
   constructor() {
-    this.gemini = new GeminiService();
+    this.groq = new GroqService();
   }
 
   async run(topic: string, onProgress: (step: string) => void): Promise<Problem[]> {
     try {
       onProgress("🎯 Intelligent Planning: Decomposing topic...");
-      const plan = await this.gemini.generateResearchPlan(topic);
+      const plan = await this.groq.generateResearchPlan(topic);
+      console.log('Research plan generated:', plan);
       
       onProgress(`🌐 Web Search: Scanning Reddit & Product Hunt...`);
-      const simulatedRawData = await this.simulateExtraction(topic, plan, onProgress);
+      const simulatedRawData = await this.groq.simulateExtraction(topic, plan);
+      console.log('Simulated data length:', simulatedRawData.length);
+      
+      onProgress(`🔍 Extracting complaints from review sites...`);
       
       onProgress("🤖 Pattern Analysis: Clustering into opportunities...");
-      const problems = await this.gemini.analyzeAndCluster(topic, simulatedRawData);
+      const problems = await this.groq.analyzeAndCluster(topic, simulatedRawData);
+      console.log('Problems found:', problems.length);
       
       onProgress("✅ Finalizing ranked results...");
-      return problems.sort((a, b) => b.signalScore - a.signalScore);
+      const sortedProblems = problems.sort((a, b) => b.signalScore - a.signalScore);
+      console.log('Sorted problems:', sortedProblems);
+      return sortedProblems;
     } catch (error) {
       console.error("Research failed:", error);
       throw error;
     }
-  }
-
-  private async simulateExtraction(topic: string, plan: ResearchPlan, onProgress: (step: string) => void): Promise<string> {
-    const apiKey = import.meta.env.VITE_API_KEY;
-    if (!apiKey) {
-      throw new Error('VITE_API_KEY environment variable is not set');
-    }
-    const ai = new GoogleGenAI({ apiKey });
-    
-    // Using flash for faster simulation
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Simulate search results for: "${topic}". 
-      Subreddits: ${plan.subreddits.join(', ')}.
-      Generate 15 specific raw user complaints and forum posts with source URLs.`,
-    });
-
-    onProgress(`🔍 Extracting complaints from review sites...`);
-    
-    return response.text || '';
   }
 }
